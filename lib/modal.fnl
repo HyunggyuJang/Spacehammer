@@ -204,6 +204,9 @@ switching menus in one place which is then powered by config.fnl.
                 :action deactivate-modal}
                {:mods [:ctrl]
                 :key "["
+                :action deactivate-modal}
+               {:mods [:ctrl]
+                :key :g
                 :action deactivate-modal}])
       (bind-keys)))
 
