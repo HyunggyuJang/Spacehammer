@@ -1,4 +1,4 @@
-(hs.ipc.cliInstall) ; ensure CLI installed
+;; (hs.ipc.cliInstall) ; ensure CLI installed
 
 (local fennel (require :fennel))
 (require :lib.globals)
