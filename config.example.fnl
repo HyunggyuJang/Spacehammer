@@ -167,13 +167,13 @@
 
 (local window-swaps
        [{:key :h
-         :action "hhtwms:swap-window-left"}
+         :action "tiling:swap-window-left"}
         {:key :j
-         :action "hhtwms:swap-window-above"}
+         :action "tiling:swap-window-above"}
         {:key :k
-         :action "hhtwms:swap-window-below"}
+         :action "tiling:swap-window-below"}
         {:key :l
-         :action "hhtwms:swap-window-right"}])
+         :action "tiling:swap-window-right"}])
 
 (local window-resize
        [{:mods [:shift]
