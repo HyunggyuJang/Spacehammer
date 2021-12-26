@@ -84,7 +84,8 @@
 
 (tset hhtwm :filters
       [{:app "Emacs" :title "edit" :tile false}
-       {:app "Emacs" :title "capture" :tile false}])
+       {:app "Emacs" :title "capture" :tile false}
+       {:app "Emacs" :title "Emacs Everywhere.*" :tile false}])
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Layout
