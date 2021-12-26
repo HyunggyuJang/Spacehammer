@@ -1,3 +1,91 @@
+;;; emacs-everywhere.el --- System-wide popup windows for quick edits -*- lexical-binding: t; -*-
+
+;; Copyright (C) 2021 TEC
+
+;; Author: TEC <https://github.com/tecosaur>
+;; Maintainer: TEC <tec@tecosaur.com>
+;; Created: February 06, 2021
+;; Modified: February 06, 2021
+;; Version: 0.0.1
+;; Keywords: conenience, frames
+;; Homepage: https://github.com/tecosaur/emacs-everywhere
+;; Package-Requires: ((emacs "26.3"))
+
+;;; License:
+
+;; This file is part of org-pandoc-import, which is not part of GNU Emacs.
+;; SPDX-License-Identifier: GPL-3.0-or-later
+
+;;; Commentary:
+
+;;  System-wide popup Emacs windows for quick edits
+
+;;; Code:
+
+(require 'cl-lib)
+(require 'server)
+
+(defgroup emacs-everywhere ()
+  "Customise group for Emacs-everywhere."
+  :group 'convenience)
+
+(defcustom emacs-everywhere-markdown-windows
+  '("Zulip" "Stack Exchange" "Stack Overflow" ; Sites
+    "^(7) " ; Reddit
+    "Pull Request" "Issue" "Comparing .*\\.\\.\\." ; Github
+    "Discord")
+  "For use with `emacs-everywhere-markdown-p'.
+Patterns which are matched against the window title."
+  :type '(rep string)
+  :group 'emacs-everywhere)
+
+(defcustom emacs-everywhere-markdown-apps
+  '("Discord")
+  "For use with `emacs-everywhere-markdown-p'.
+Patterns which are matched against the app name."
+  :type '(rep string)
+  :group 'emacs-everywhere)
+
+(defcustom emacs-everywhere-force-use-org-mode nil
+  "Whether use `org-mode' as editiong mode or not.
+This force to set `org-mode' even if it is markdown flavor site."
+  :type 'boolean
+  :group 'emacs-everywhere)
+
+(defcustom emacs-everywhere-frame-name-format "Emacs Everywhere :: %s — %s"
+  "Format string used to produce the frame name.
+Formatted with the app name, and truncated window name."
+  :type 'string
+  :group 'emacs-everywhere)
+
+(defcustom emacs-everywhere-init-hooks
+  '(emacs-everywhere-set-frame-name
+    emacs-everywhere-set-frame-position
+    emacs-everywhere-major-mode
+    emacs-everywhere-insert-selection)
+  "Hooks to be run before function `emacs-everywhere-mode'."
+  :type 'hook
+  :group 'emacs-everywhere)
+
+(defcustom emacs-everywhere-determine-mode-alist
+  (list
+   (cons (lambda () (and (not emacs-everywhere-force-use-org-mode)
+                         (fboundp 'markdown-mode)
+                         (emacs-everywhere-markdown-p))) 'markdown-mode)
+   ;; (cons (lambda () (and (fboundp 'latex-mode)
+   ;;                       (emacs-everywhere-latex-p))) 'latex-mode)
+   (cons (lambda () t) #'org-mode))
+  "List to determine major mode for emacs-everywhere."
+  :type 'list
+  :group 'emacs-everywhere)
+
+
+(defcustom emacs-everywhere-final-hooks
+  '(emacs-everywhere-return-converted-org-to-gfm)
+  "Hooks to be run just before content is copied."
+  :type 'hook
+  :group 'emacs-everywhere)
+
 (defun spacehammer/alert (message)
   "shows Hammerspoon's hs.alert popup with a MESSAGE"
   (when (and message (eq system-type 'darwin))
@@ -73,7 +161,7 @@ DIRECTION - can be North, South, West, East"
     - buffer-name - the name of the edit buffer
     - pid         - PID of the app that invoked Edit-with-Emacs")
 
-(defun spacehammer/edit-with-emacs (&optional pid title screen)
+(defun spacehammer/edit-with-emacs (&optional name pid title screen)
   "Edit anything with Emacs
 
 PID is a pid of the app (the caller is responsible to set that right)
