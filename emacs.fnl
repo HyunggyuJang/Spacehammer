@@ -16,7 +16,6 @@
   "Executes emacsclient, evaluating a special elisp function in spacehammer.el
    (it must be pre-loaded), passing PID, title and display-id of the caller."
   (let [current-app (: (hs.window.focusedWindow) :application)
-        name        (.. "\"" (: current-app :name) "\"")
         pid         (.. "\"" (: current-app :pid) "\"")
         title       (.. "\"" (: current-app :title) "\"")
         screen      (.. "\"" (: (hs.screen.mainScreen) :id) "\"")
@@ -24,7 +23,7 @@
                      "/usr/local/bin/emacsclient"
                      " -c -F '(quote (name . \"edit\"))' "
                      " -e '(spacehammer/edit-with-emacs "
-                     pid " " name " " title " " screen " )' &")
+                     pid " " title " " screen " )' &")
         co          (coroutine.create (fn [run-str]
                                         (io.popen run-str)))
         prev        (hs.pasteboard.changeCount)
