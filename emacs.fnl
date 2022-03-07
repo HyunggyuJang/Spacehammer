@@ -1,57 +1,31 @@
-(fn capture [is-note]
-  "Activates org-capture"
-  (let [key         (if is-note "\"z\"" "")
-        current-app (hs.window.focusedWindow)
-        pid         (.. "\"" (: current-app :pid) "\" ")
-        title       (.. "\"" (: current-app :title) "\" ")
-        run-str     (..
-                     "/usr/local/bin/emacsclient"
-                     " -c -F '(quote (name . \"capture\"))'"
-                     " -e '(spacehammer/activate-capture-frame "
-                     pid title key " )' &")
-        timer       (hs.timer.delayed.new .1 (fn [] (io.popen run-str)))]
-    (: timer :start)))
-
 (fn edit-with-emacs []
   "Executes emacsclient, evaluating a special elisp function in spacehammer.el
    (it must be pre-loaded), passing PID, title and display-id of the caller."
   (let [current-app (: (hs.window.focusedWindow) :application)
         pid         (.. "\"" (: current-app :pid) "\"")
+        name      (.. "\"" (: current-app :name) "\"")
         title       (.. "\"" (: current-app :title) "\"")
-        screen      (.. "\"" (: (hs.screen.mainScreen) :id) "\"")
         run-str     (..
-                     "/usr/local/bin/emacsclient"
-                     " -c -F '(quote (name . \"edit\"))' "
-                     " -e '(spacehammer/edit-with-emacs "
-                     pid " " title " " screen " )' &")
+                     "/opt/homebrew/bin/emacsclient"
+                     " -e '(emacs-everywhere (emacs-everywhere--app-info "
+                     pid " " name " " title " ))' &")
         co          (coroutine.create (fn [run-str]
                                         (io.popen run-str)))
         prev        (hs.pasteboard.changeCount)
-        _           (hs.eventtap.keyStroke [:cmd] :c)
+        _           (hs.eventtap.keyStroke [:cmd] :x)
         next        (hs.pasteboard.changeCount)]
     (when (= prev next)         ; Pasteboard was not updated so no text was selected
       (hs.eventtap.keyStroke [:cmd] :a)  ; select all
-      (hs.eventtap.keyStroke [:cmd] :c)  ; copy
+      (hs.eventtap.keyStroke [:cmd] :x)  ; copy
       )
     (coroutine.resume co run-str)))
-
-(fn edit-with-emacs-callback [pid title screen]
-  "Don't remove! - this is callable from Emacs
-   See: `spacehammer/edit-with-emacs` in spacehammer.el"
-  (let [emacs-app   (hs.application.find :Emacs)
-        edit-window (: emacs-app :findWindow :edit)
-        scr         (hs.screen.find (tonumber screen))
-        windows     (require :windows)]
-    (when (and edit-window scr)
-      (: edit-window :moveToScreen scr)
-      (: windows :center-window-frame))))
 
 (fn run-emacs-fn
   [elisp-fn args]
   "Executes given elisp function in emacsclient. If args table present, passes
    them into the function."
   (let [args-lst (when args (.. " '" (table.concat args " '")))
-        run-str  (.. "/usr/local/bin/emacsclient"
+        run-str  (.. "/opt/homebrew/bin/emacsclient"
                      " -e \"(funcall '" elisp-fn
                      (if args-lst args-lst " &")
                      ")\" &")]
@@ -103,10 +77,11 @@
    `spacehammer/finish-edit-with-emacs` in spacehammer.el."
   (let [app (hs.application.applicationForPID (tonumber pid))]
     (when app
+      (hs.alert.show (: app :name))
       (: app :activate)
       (hs.timer.doAfter
        0.001
-       (fn [] (: app :selectMenuItem [:Edit :Paste]))))))
+       (fn [] (hs.eventtap.keyStroke [:cmd] :v))))))
 
 (fn maximize
   []
@@ -121,12 +96,9 @@
          (: app :activate)
          (windows.maximize-window-frame))))))
 
-{:capture                          capture
- :edit-with-emacs                  edit-with-emacs
- :editWithEmacsCallback            edit-with-emacs-callback
+{:edit-with-emacs                  edit-with-emacs
  :full-screen                      full-screen
  :maximize                         maximize
- :note                             (fn [] (capture true))
  :switchToApp                      switch-to-app
  :switchToAppAndPasteFromClipboard switch-to-app-and-paste-from-clipboard
  :vertical-split-with-emacs        vertical-split-with-emacs}
