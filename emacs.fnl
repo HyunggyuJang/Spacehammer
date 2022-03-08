@@ -1,14 +1,14 @@
 (fn edit-with-emacs []
   "Executes emacsclient, evaluating a special elisp function in spacehammer.el
    (it must be pre-loaded), passing PID, title and display-id of the caller."
-  (let [current-app (: (hs.window.focusedWindow) :application)
-        pid         (.. "\"" (: current-app :pid) "\"")
-        name      (.. "\"" (: current-app :name) "\"")
-        title       (.. "\"" (: current-app :title) "\"")
+  (let [current-wind (hs.window.focusedWindow)
+        id         (.. "\"" (: current-wind :id) "\"")
+        name        (: (: current-wind :application) :name)
+        title       (.. "\"" (: current-wind :title) "\"")
         run-str     (..
                      "/opt/homebrew/bin/emacsclient"
                      " -e '(emacs-everywhere (emacs-everywhere--app-info "
-                     pid " " name " " title " ))' &")
+                     id " " name " " title " ))' &")
         co          (coroutine.create (fn [run-str]
                                         (io.popen run-str)))
         prev        (hs.pasteboard.changeCount)
@@ -66,19 +66,18 @@
              (hs.application.launchOrFocus :Emacs)
              (windows.rect rect-left)))))))
 
-(fn switch-to-app [pid]
+(fn switch-to-app [id]
   "Don't remove! - this is callable from Emacs See: `spacehammer/switch-to-app`
    in spacehammer.el "
-  (let [app (hs.application.applicationForPID (tonumber pid))]
-    (when app (: app :activate))))
+  (let [wind (hs.window.get (tonumber id))]
+    (when wind (: wind :focus))))
 
-(fn switch-to-app-and-paste-from-clipboard [pid]
+(fn switch-to-app-and-paste-from-clipboard [id]
   "Don't remove! - this is callable from Emacs See:
    `spacehammer/finish-edit-with-emacs` in spacehammer.el."
-  (let [app (hs.application.applicationForPID (tonumber pid))]
-    (when app
-      (hs.alert.show (: app :name))
-      (: app :activate)
+  (let [wind (hs.window.get (tonumber id))]
+    (when wind
+      (: wind :focus)
       (hs.timer.doAfter
        0.001
        (fn [] (hs.eventtap.keyStroke [:cmd] :v))))))
