@@ -2,18 +2,18 @@
   "Executes emacsclient, evaluating a special elisp function in spacehammer.el
    (it must be pre-loaded), passing PID, title and display-id of the caller."
   (let [current-wind (hs.window.focusedWindow)
-        id         (.. "\"" (: current-wind :id) "\"")
-        name        (: (: current-wind :application) :name)
-        title       (.. "\"" (: current-wind :title) "\"")
-        run-str     (..
-                     "/opt/homebrew/bin/emacsclient"
-                     " -e '(emacs-everywhere (emacs-everywhere--app-info "
-                     id " " name " " title " ))' &")
-        co          (coroutine.create (fn [run-str]
-                                        (io.popen run-str)))
-        prev        (hs.pasteboard.changeCount)
-        _           (hs.eventtap.keyStroke [:cmd] :x)
-        next        (hs.pasteboard.changeCount)]
+        id           (.. "\"" (: current-wind :id) "\"")
+        name         (.. "\"" (: (: current-wind :application) :name) "\"")
+        title        (.. "\"" (: current-wind :title) "\"")
+        run-str      (..
+                      "/opt/homebrew/bin/emacsclient"
+                      " -e '(emacs-everywhere (emacs-everywhere--app-info "
+                      id " " name " " title " ))' &")
+        co           (coroutine.create (fn [run-str]
+                                         (io.popen run-str)))
+        prev         (hs.pasteboard.changeCount)
+        _            (hs.eventtap.keyStroke [:cmd] :x)
+        next         (hs.pasteboard.changeCount)]
     (when (= prev next)         ; Pasteboard was not updated so no text was selected
       (hs.eventtap.keyStroke [:cmd] :a)  ; select all
       (hs.eventtap.keyStroke [:cmd] :x)  ; copy
