@@ -103,7 +103,7 @@
   - Set layout as the main window comes to the right half of current display
   - Start tiling
   "
-  (hhtwm.setLayout "main-right")
+  (hhtwm.setLayout "tabbed-left")
   (hhtwm.start))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
