@@ -7,8 +7,8 @@
         title        (.. "\"" (: current-wind :title) "\"")
         run-str      (..
                       "/opt/homebrew/bin/emacsclient"
-                      " -e '(emacs-everywhere (emacs-everywhere--app-info "
-                      id " " name " " title " ))' &")
+                      " -e '(progn (setq mac-use-title-bar t) (emacs-everywhere (emacs-everywhere--app-info "
+                      id " " name " " title " )))' &")
         co           (coroutine.create (fn [run-str]
                                          (io.popen run-str)))
         prev         (hs.pasteboard.changeCount)
